@@ -1,0 +1,20 @@
+* {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    position: absolute;
+}
+
+textarea {
+    width: 600px;
+    max-width: 600px;
+    min-width: 600px;
+    min-height: 15px;
+}
+
+#getpubkey {
+    position: absolute;
+    right: 264px;
+    top: 86px;
+}

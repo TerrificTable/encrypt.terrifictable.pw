@@ -4,117 +4,39 @@
     <meta charset="UTF-8">
     <title>PGP Encryption Utils</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="style.css">
+
     <script src="https://unpkg.com/openpgp@5.2.1/dist/openpgp.min.js"></script>
-    <script>
-        async function encrypt(text) {
-            const message = await openpgp.createMessage({
-                text: text,
-                format: "utf8",
-            });
-            const encrypted = await openpgp.encrypt({
-                message: message,
-                encryptionKeys: await openpgp.readKey({
-                    armoredKey: document.getElementById("public_key").value,
-                })
-            });
-            console.log(encrypted);
-            document.getElementById("encrypted").value = encrypted;
-        }
-        
-        function copy(element) {
-            //copy the element's value to clipboard
-            element.select();
-            element.setSelectionRange(0, 99999);
-            try {
-                navigator.clipboard.writeText(element.value).then(() => {
-                    const copy_button = document.getElementById("copy_button");
-                    //change the text to "copied" with a checkmark unicode
-                    copy_button.innerHTML = "&#x2713; Copied!";
-        
-                    setTimeout(() => {
-                        copy_button.innerHTML = "Copy encrypted message";
-                    }, 3000);
-                }).catch(err => {
-                    console.error("Could not copy email: ", err);
-                    alert("Could not copy message: " + err);
-                });
-            } catch (err) {
-                console.error("Could not copy email: ", err);
-                alert("Could not copy message: " + err);
-            }
-        }
-        
-        function insertPublicKey() {
-            document.getElementById("public_key").value = "" +
-                "-----BEGIN PGP PUBLIC KEY BLOCK-----\n" +
-                "\n" +
-                "mQGNBGJ8AJABDAC5dRl6LLmawFQmMGOaPU9DCrOg4zhlr14+bXa70ej2pZmvCtnY\n" +
-                "6la1inxm6Fp+/yqKg8rFXki8TG5+lmzwD+zvxUBOnF5w6BR1CjZjUDnex4P/p+FB\n" +
-                "G10Nk5pmwVDNYh9KTK+k2fcvBhu3BfgucNZm9tct6cRG/klWlrgYYk0MR5uU+9lI\n" +
-                "kWc6crCdjY39LmIHhqR7M3kWtLlA1DMb98lp4mAu81kyg6tASgahVib9BK/sWcMO\n" +
-                "DZOKdg4+vTS1W2wxAWPsBEHCxbmcQjiZ7FPDLCSy5yWfugRa394naUb7Prv+Qe3r\n" +
-                "x3CO3dRDVF2/cb+HYo+IelgBEMEvQ9thv2woZg2KQFupLvRz+XOFD9OMtdCqtbGj\n" +
-                "MNQjf73c4iHJvImB1RGsKQYMSFVhjDEXw7VY0BXPblZlHDJY7HMr2bv6sEd6SvHC\n" +
-                "kiKyFvENqFua0LKxA5OgrP8NpXZ9MERpYhLDbSzQSIU6y7kAJ/mLt6IthJyXfYY3\n" +
-                "lJcO3wcJA0ilqDsAEQEAAbQpQWxleGFuZGVyIEVwb2xpdGUgPGFsZXhhbmRlckBl\n" +
-                "cG9saXRlLm5ldD6JAc4EEwEKADgWIQQd0i5DqtbOKwSCHk+HtrIuxtMtRwUCYnwA\n" +
-                "kAIbAwULCQgHAgYVCgkICwIEFgIDAQIeAQIXgAAKCRCHtrIuxtMtR1VuC/0fsHQg\n" +
-                "FzRcoZosnjiCP91oSsliqszP8X/wn+RGu2lCjQaVVHCR7guy1V6YKK35QN7FvmlC\n" +
-                "6M1VE32/Sn4Luxa/9VoPOLkLt8dUcKOcLnVevKaNCOPExw9AQn0AiS9Vh4NMtMgg\n" +
-                "6drMipMi2YMud8qvsRx9282Scz2SAQ6q8RF6SsRt1uWqhaPQ0smWNVgzH+1+Nh7v\n" +
-                "3uT+TflWkcG3bIzzVYWwmCJIQviKBSBf6xsARKgDWd5O3GY0fY/nm2FhXG/TQBus\n" +
-                "QTPlVaV8VNWrW0f+iXs+u2HSBFoZ5c9rYtjjeaIos7BhEGCc9vZG9sfOr7DtiI7i\n" +
-                "4PnFL+LJWXs8um8HRz4MOwSwjjIP3Wl6ed3XJ738ezNqrM1tG8RsAc5j6VD+pyvc\n" +
-                "7ehjjfdnp0AKqx7Tw3bTTjQ9myUx47vixNa1vqZfQLdbzDo1JeTOi8qM0AOC5+Hy\n" +
-                "JIpKASkM6LBudwv0peFrTgCeC9nft5tpwKJ4PxpfLRHs41S9zUAKXYcMGDG5AY0E\n" +
-                "YnwAkAEMALuKrcgUmMo3QUzR5qhxiPOiAY8mPudSTCeJIUhwdCL4SEYhdbDzTGXE\n" +
-                "A4bhR4n0RClteIJ3STKxhjkgjoQpoXpMJXzaciLIOW+ATnaaUVk72NtbVpBAw/uy\n" +
-                "F1uOuljKHyDdr3wp48KEuje43T5Ca1usb+rBjnilrtJK811y4CGqo8zeMSJez9YN\n" +
-                "cR667S9x1s0Mq7Y80S40gNu2XIwCIdeQzzzSoSbkX4csf1fk4UuZi50kS8ck+EUa\n" +
-                "OPHrqzqVPrk5DaHXvWznRFJ+qDYxK/VdhllRENIItE2g0PUNs8yO6qZTA12g9bv3\n" +
-                "KiGiMQmXxOWwZk0EoNeyoLxfusq8JqHCAoQ/w3w04LxeJewjss7WRAxKZv56b/MC\n" +
-                "7Wsi5Tl7FXpUzKZoIkxQLk6hQzB7bOOZBXAimKvuwCzTJaOoanDGKWMYXMDlYklN\n" +
-                "rvn+2UvsA7lRoMvOkqw1V326SZTYscrlvUOAJGdWrDdYWcPz4BYZcse3QyMS7wi5\n" +
-                "1tNSFXSVGwARAQABiQG2BBgBCgAgFiEEHdIuQ6rWzisEgh5Ph7ayLsbTLUcFAmJ8\n" +
-                "AJACGwwACgkQh7ayLsbTLUfMuAv/SPvJiMhBS5eq8j3Lyi2Hw1QALv8BZzo3nn+8\n" +
-                "1n9ElHpSwQD9Kt2wEkRe1VpPVM00eipuRzklGOVqbfh29R6ga6Mlm8GmbkkEQ+Cm\n" +
-                "ojnYTrdtbLkWK8jP9wcAiEyPK8mCIDECtLPGCV2u+1WuBzOa8BgPOZDreDIb1Ds0\n" +
-                "IFx4XWtc84BokIaWM+AbA5Fi9etBGAaYjzDSU4BCYs8kj1u3/UFsN+xbzKtg+5ep\n" +
-                "fpSXZZaq+nklKl/h9TY3YJD2bjFNm+AB+STXLPWKlc62Jbw6NT6373X3p59kgcN1\n" +
-                "9iXUwU0SuHlZuBiWs8y6oQJ4ua/rJkv/Ed3Ibna7khNDaHUXCGr9eBDMvUlBLNH1\n" +
-                "yUenBrf28GSbciz4LVa7hkBQ7YcviJlLbThUY7Oy8DVfHFoca6sQmqVNfhsdrFRT\n" +
-                "yJNciS5hu1LzMSt9mqnrCkcPcV8HcMA8EeXQmMgiHW9WGF7XDMgitvM+VocY4JXo\n" +
-                "Nb3Q7Rxsuqw+B3gFUKfhnPvoAzZI\n" +
-                "=ulFv\n" +
-                "-----END PGP PUBLIC KEY BLOCK-----"
-        }
-        
-    </script>
+    <script src="script.js"></script>
 </head>
 <body>
-<noscript>
-    <h1>Please enable JavaScript</h1>
-</noscript>
-<h2>Encrypt Message</h2>
-<label for="public_key">Public Key</label><button onclick="insertPublicKey()">Use my public key &lt;&zwj;al&zwj;exa&zwj;nd&zwj;er&commat;ep&zwj;o&zwj;lite&period;n&zwj;et&zwj;&gt;</button><br>
-<textarea id="public_key" rows="10" cols="50"></textarea><br><br>
-<label for="message-encrypt">Message</label><br>
-<textarea id="message-encrypt" rows="10" cols="50"></textarea>
-<br><br>
-<button onclick="encrypt(document.getElementById('message-encrypt').value)">Encrypt</button><br>
-<br>
-<label for="encrypted">Encrypted Message</label><br>
-<textarea id="encrypted" rows="10" cols="50" readonly></textarea><br>
-<button onclick="copy(document.getElementById('encrypted'))" id="copy_button">Copy encrypted message</button>
-<br>
-<p>
-    You can send the resulted encrypted message (usually via email) to the person who owns the private key.
+    <noscript>
+        <h1>Please enable JavaScript</h1>
+    </noscript>
+    
+    <h2>Encrypt Message</h2>
+    <label for="public_key">Public Key</label>
+    <button id="getpubkey" onclick="insertPublicKey()">Use my public key &lt;terrifictable55&commat;gmail.com&gt;</button><br>
+    
+    <textarea id="public_key" rows="10" cols="50"></textarea><br><br>
+    <label for="message-encrypt">Message</label><br>
+    
+    <textarea id="message-encrypt" rows="10" cols="50"></textarea><br>
+    <button onclick="encrypt(document.getElementById('message-encrypt').value)" id="encrypt" >Encrypt</button><br><br>
+    <label for="encrypted">Encrypted Message</label><br>
+    
+    <textarea id="encrypted" rows="10" cols="50" readonly></textarea><br>
+    <button onclick="copy(document.getElementById('encrypted'))" id="copy_button">Copy encrypted message</button><br>
+    
     <p>
-    Only the person who has the private (or secret) key can decrypt the message, but anyone can encrypt using the public key.
-</p>
+        You can send the resulted encrypted message (usually via email) to the person who owns the private key.
+        <p>
+        Only the person who has the private (or secret) key can decrypt the message, but anyone can encrypt using the public key.
+    </p>
 </body>
 <footer>
     <p>The OpenPGP library is under the LGPL license, read more <a href="/license_notice.txt">here</a>.</p>
 </footer>
 </html>
-Footer
+
